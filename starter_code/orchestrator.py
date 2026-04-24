@@ -20,27 +20,46 @@ def run_pipeline():
     
     # Xử lý Group A (PDFs)
     pdf_files = glob.glob(os.path.join(RAW_DATA_DIR, "group_a_pdfs", "*.json"))
+    print(f"Found {len(pdf_files)} PDF data files.")
+    
     for file_path in pdf_files:
-        with open(file_path, 'r') as f:
+        with open(file_path, 'r', encoding='utf-8') as f:
             raw_data = json.load(f)
         
-        # TODO: Bước 1: Gọi hàm xử lý PDF (process_pdf_data)
+        # Bước 1: Gọi hàm xử lý PDF (process_pdf_data)
+        processed_doc = process_pdf_data(raw_data)
         
-        # TODO: Bước 2: Kiểm tra chất lượng (run_semantic_checks). 
-        # Nếu đạt (True) thì thêm vào list final_kb
+        # Bước 2: Kiểm tra chất lượng (run_semantic_checks)
+        # Giả định run_semantic_checks trả về (is_valid, doc) hoặc True/False
+        if run_semantic_checks(processed_doc):
+            final_kb.append(processed_doc)
+            print(f"Successfully processed and validated: {file_path}")
+        else:
+            print(f"Quality check fail for: {file_path}")
 
     # Xử lý Group B (Videos)
     video_files = glob.glob(os.path.join(RAW_DATA_DIR, "group_b_videos", "*.json"))
+    print(f"Found {len(video_files)} Video data files.")
+    
     for file_path in video_files:
-        with open(file_path, 'r') as f:
+        with open(file_path, 'r', encoding='utf-8') as f:
             raw_data = json.load(f)
         
-        # TODO: Làm tương tự như phần PDF (gọi hàm xử lý Video và kiểm tra chất lượng)
+        # Bước 3: Gọi hàm xử lý Video (process_video_data)
+        processed_doc = process_video_data(raw_data)
+        
+        # Bước 4: Kiểm tra chất lượng
+        if run_semantic_checks(processed_doc):
+            final_kb.append(processed_doc)
+            print(f"Successfully processed and validated: {file_path}")
+        else:
+            print(f"Quality check fail for: {file_path}")
 
     # Lưu kết quả
-    with open(OUTPUT_FILE, 'w') as f:
-        json.dump(final_kb, f, indent=4)
-        print(f"Pipeline finished! Saved {len(final_kb)} records.")
+    with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
+        json.dump(final_kb, f, indent=4, ensure_ascii=False)
+        print("-" * 30)
+        print(f"Pipeline finished! Total records saved: {len(final_kb)}")
 
 if __name__ == "__main__":
     run_pipeline()

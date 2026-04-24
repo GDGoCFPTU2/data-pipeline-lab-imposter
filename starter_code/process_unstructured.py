@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 # ==========================================
 # ROLE 2: ETL/ELT BUILDER
@@ -7,14 +8,33 @@ import re
 def process_pdf_data(raw_json: dict) -> dict:
     # Bước 1: Làm sạch nhiễu (Header/Footer) khỏi văn bản
     raw_text = raw_json.get("extractedText", "")
-    # TODO: Dùng re.sub để xóa 'HEADER_PAGE_X' và 'FOOTER_PAGE_X'
-    cleaned_content = ""
+    
+    cleaned_content = re.sub(r'(HEADER_PAGE_\d+|FOOTER_PAGE_\d+)', '', raw_text)
+    # Làm sạch thêm khoảng trắng thừa sau khi xóa header/footer
+    cleaned_content = cleaned_content.strip()
     
     # Bước 2: Map dữ liệu thô sang định dạng chuẩn của UnifiedDocument
-    # TODO: Trả về dictionary với các key: document_id, source_type, author, category, content, timestamp
-    return {}
+    unified_doc = {
+        "document_id": raw_json.get("doc_id"),
+        "source_type": "PDF",
+        "author": raw_json.get("metadata", {}).get("author", "Unknown"),
+        "category": raw_json.get("category", "General"),
+        "content": cleaned_content,
+        "timestamp": raw_json.get("creation_date", datetime.now().isoformat())
+    }
+    
+    return unified_doc
 
 def process_video_data(raw_json: dict) -> dict:
-    # TODO: Map dữ liệu thô từ Video sang định dạng chuẩn (giống PDF)
-    # Lưu ý các key của Video: video_id, creator_name, transcript, category, published_timestamp
-    return {}
+    # Map dữ liệu thô từ Video sang định dạng chuẩn (giống PDF)
+    # Lưu ý: Transcript của video sẽ được map vào trường 'content'
+    unified_doc = {
+        "document_id": raw_json.get("video_id"),
+        "source_type": "VIDEO",
+        "author": raw_json.get("creator_name", "Unknown"),
+        "category": raw_json.get("category", "General"),
+        "content": raw_json.get("transcript", ""),
+        "timestamp": raw_json.get("published_timestamp", datetime.now().isoformat())
+    }
+    
+    return unified_doc
