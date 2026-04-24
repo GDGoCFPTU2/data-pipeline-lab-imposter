@@ -15,12 +15,12 @@ def process_pdf_data(raw_json: dict) -> dict:
     
     # Bước 2: Map dữ liệu thô sang định dạng chuẩn của UnifiedDocument
     unified_doc = {
-        "document_id": raw_json.get("doc_id"),
+        "document_id": raw_json.get("docId"),
         "source_type": "PDF",
-        "author": raw_json.get("metadata", {}).get("author", "Unknown"),
-        "category": raw_json.get("category", "General"),
+        "author": raw_json.get("metadata", {}).get("authorName", "Unknown"),
+        "category": raw_json.get("docCategory", "General"),
         "content": cleaned_content,
-        "timestamp": raw_json.get("creation_date", datetime.now().isoformat())
+        "timestamp": raw_json.get("createdAt", datetime.now().isoformat())
     }
     
     return unified_doc
@@ -30,7 +30,7 @@ def process_video_data(raw_json: dict) -> dict:
     # Lưu ý: Transcript của video sẽ được map vào trường 'content'
     unified_doc = {
         "document_id": raw_json.get("video_id"),
-        "source_type": "VIDEO",
+        "source_type": "Video",
         "author": raw_json.get("creator_name", "Unknown"),
         "category": raw_json.get("category", "General"),
         "content": raw_json.get("transcript", ""),
